@@ -147,16 +147,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
                     @Override
                     public void onMapClick(LatLng position) {
-                        Toast.makeText(MapsActivity.this, position.latitude + " : " + position.longitude, Toast.LENGTH_SHORT).show();
+
                         LatLng lt=new LatLng(position.latitude,position.longitude);
                         Geocoder geocoder=new Geocoder(getApplicationContext());
                         String add = "";
                         try {
-                            List<Address> list=geocoder.getFromLocation(latitude,longitude,1);
+                            List<Address> list=geocoder.getFromLocation(position.latitude,position.longitude,1);
                             add=list.get(0).getSubLocality()+", "+list.get(0).getLocality();
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
+                        Toast.makeText(MapsActivity.this, add,Toast.LENGTH_SHORT).show();
                         mMap.clear();
                         mMap.addMarker(new MarkerOptions().position(lt).title(add));
                     }
