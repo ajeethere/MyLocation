@@ -1,22 +1,29 @@
 package com.example.mylocation;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.Uri;
+import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.IOException;
@@ -24,14 +31,18 @@ import java.util.List;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
+    ImageView moveToMap;
     private GoogleMap mMap;
     LocationManager locationManager;
-
+    double latitude;
+    double longitude;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+
+        moveToMap=(ImageView)findViewById(R.id.move_to_map);
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
@@ -50,8 +61,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, new LocationListener() {
                 @Override
                 public void onLocationChanged(Location location) {
-                    double latitude=location.getLatitude();
-                    double longitude=location.getLongitude();
+                    latitude=location.getLatitude();
+                    longitude=location.getLongitude();
                     LatLng latLng=new LatLng(latitude,longitude);
                     Geocoder geocoder=new Geocoder(getApplicationContext());
                     try {
@@ -86,8 +97,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, new LocationListener() {
                 @Override
                 public void onLocationChanged(Location location) {
-                    double latitude=location.getLatitude();
-                    double longitude=location.getLongitude();
+                    latitude=location.getLatitude();
+                    longitude=location.getLongitude();
                     LatLng latLng=new LatLng(latitude,longitude);
                     Geocoder geocoder=new Geocoder(getApplicationContext());
                     try {
@@ -120,7 +131,43 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             });
         }
 
+        moveToMap.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+             //   String url = "https://www.google.com/maps/dir/?api=1&destination=" + latitude + "," + longitude + "&travelmode=driving";
+                String url = "https://www.google.com/maps/dir/?api=1&destination=" + latitude + "," + longitude;
+
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                startActivity(intent);
+            }
+        });
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+                    @Override
+                    public void onMapClick(LatLng position) {
+                        Toast.makeText(MapsActivity.this, position.latitude + " : " + position.longitude, Toast.LENGTH_SHORT).show();
+                        LatLng lt=new LatLng(position.latitude,position.longitude);
+                        Geocoder geocoder=new Geocoder(getApplicationContext());
+                        String add = "";
+                        try {
+                            List<Address> list=geocoder.getFromLocation(latitude,longitude,1);
+                            add=list.get(0).getSubLocality()+", "+list.get(0).getLocality();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        mMap.clear();
+                        mMap.addMarker(new MarkerOptions().position(lt).title(add));
+                    }
+                });
+            }
+        },5000);
+
+
+
     }
+
 
 
     /**
