@@ -66,6 +66,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
             });
 
+        }else if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
+            
         }
 
     }
