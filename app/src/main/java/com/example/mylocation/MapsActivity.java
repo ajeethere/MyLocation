@@ -36,6 +36,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     LocationManager locationManager;
     double latitude;
     double longitude;
+    LatLng lt;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -68,9 +69,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     try {
                         List<Address> list=geocoder.getFromLocation(latitude,longitude,1);
                         String city=list.get(0).getLocality();
-                        city +=list.get(0).getCountryName();
+                        city +=", "+list.get(0).getCountryName();
                         mMap.addMarker(new MarkerOptions().position(latLng).title(city));
-                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 10.2f));
+                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15.2f));
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -104,9 +105,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     try {
                         List<Address> list=geocoder.getFromLocation(latitude,longitude,1);
                         String city=list.get(0).getLocality();
-                        city +=list.get(0).getCountryName();
+                        city +=", "+list.get(0).getCountryName();
                         mMap.addMarker(new MarkerOptions().position(latLng).title(city));
-                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 10.2f));
+                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15.2f));
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -131,16 +132,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             });
         }
 
-        moveToMap.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-             //   String url = "https://www.google.com/maps/dir/?api=1&destination=" + latitude + "," + longitude + "&travelmode=driving";
-                String url = "https://www.google.com/maps/dir/?api=1&destination=" + latitude + "," + longitude;
 
-                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-                startActivity(intent);
-            }
-        });
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -148,7 +140,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     @Override
                     public void onMapClick(LatLng position) {
 
-                        LatLng lt=new LatLng(position.latitude,position.longitude);
+                        lt=new LatLng(position.latitude,position.longitude);
+
                         Geocoder geocoder=new Geocoder(getApplicationContext());
                         String add = "";
                         try {
@@ -160,12 +153,22 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         Toast.makeText(MapsActivity.this, add,Toast.LENGTH_SHORT).show();
                         mMap.clear();
                         mMap.addMarker(new MarkerOptions().position(lt).title(add));
+                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(lt, 15.2f));
                     }
                 });
             }
         },5000);
 
+        moveToMap.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //   String url = "https://www.google.com/maps/dir/?api=1&destination=" + latitude + "," + longitude + "&travelmode=driving";
+                String url = "https://www.google.com/maps/dir/?api=1&destination=" + lt.latitude + "," + lt.longitude;
 
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                startActivity(intent);
+            }
+        });
 
     }
 
