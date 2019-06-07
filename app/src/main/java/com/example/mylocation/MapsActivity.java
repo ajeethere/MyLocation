@@ -3,6 +3,8 @@ package com.example.mylocation;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -13,6 +15,7 @@ import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -22,6 +25,9 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -37,6 +43,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     double latitude;
     double longitude;
     LatLng lt;
+    float cameraP=15.2f;
+    boolean ready=false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,8 +78,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         List<Address> list=geocoder.getFromLocation(latitude,longitude,1);
                         String city=list.get(0).getLocality();
                         city +=", "+list.get(0).getCountryName();
-                        mMap.addMarker(new MarkerOptions().position(latLng).title(city));
-                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15.2f));
+                        BitmapDescriptor icon = BitmapDescriptorFactory.fromResource(R.drawable.location);
+
+                        mMap.addMarker(new MarkerOptions().position(latLng).title(city).icon(icon).anchor(0.5f,1));
+                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, cameraP));
+                        ready=true;
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -106,8 +117,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         List<Address> list=geocoder.getFromLocation(latitude,longitude,1);
                         String city=list.get(0).getLocality();
                         city +=", "+list.get(0).getCountryName();
-                        mMap.addMarker(new MarkerOptions().position(latLng).title(city));
-                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15.2f));
+                 //       mMap.addMarker(new MarkerOptions().position(latLng).title(city));
+                        BitmapDescriptor icon = BitmapDescriptorFactory.fromResource(R.drawable.location);
+
+                        mMap.addMarker(new MarkerOptions().position(latLng).title(city).icon(icon).anchor(0.5f,1));
+                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, cameraP));
+                        ready=true;
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -131,33 +146,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
             });
         }
-
-
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
-                    @Override
-                    public void onMapClick(LatLng position) {
-
-                        lt=new LatLng(position.latitude,position.longitude);
-
-                        Geocoder geocoder=new Geocoder(getApplicationContext());
-                        String add = "";
-                        try {
-                            List<Address> list=geocoder.getFromLocation(position.latitude,position.longitude,1);
-                            add=list.get(0).getSubLocality()+", "+list.get(0).getLocality();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        Toast.makeText(MapsActivity.this, add,Toast.LENGTH_SHORT).show();
-                        mMap.clear();
-                        mMap.addMarker(new MarkerOptions().position(lt).title(add));
-                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(lt, 15.2f));
-                    }
-                });
-            }
-        },5000);
 
         moveToMap.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -187,9 +175,37 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-//        // Add a marker in Sydney and move the camera
-//        LatLng sydney = new LatLng(-34, 151);
-//        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-//        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney, 10.2f));
+        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng position) {
+
+                lt=new LatLng(position.latitude,position.longitude);
+
+                Geocoder geocoder=new Geocoder(getApplicationContext());
+                String add = "";
+                try {
+                    List<Address> list=geocoder.getFromLocation(position.latitude,position.longitude,1);
+                    add=list.get(0).getSubLocality()+", "+list.get(0).getLocality();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                Toast.makeText(MapsActivity.this, add,Toast.LENGTH_SHORT).show();
+                mMap.clear();
+                mMap.addMarker(new MarkerOptions().position(lt).title(add));
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(lt, cameraP));
+            }
+        });
+        mMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
+            @Override
+            public void onCameraChange(CameraPosition cameraPosition) {
+                if (ready) {
+                    cameraP = mMap.getCameraPosition().zoom;
+                }
+                Log.i("centerLat", String.valueOf(cameraPosition.target.latitude));
+
+                Log.i("centerLong", String.valueOf(cameraPosition.target.longitude));
+
+            }
+        });
     }
 }
