@@ -43,8 +43,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     double latitude;
     double longitude;
     LatLng lt;
+    LatLng latLngMoved;
     float cameraP=15.2f;
     boolean ready=false;
+    boolean moved=false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -80,9 +82,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         city +=", "+list.get(0).getCountryName();
                         BitmapDescriptor icon = BitmapDescriptorFactory.fromResource(R.drawable.location);
 
+                        mMap.clear();
                         mMap.addMarker(new MarkerOptions().position(latLng).title(city).icon(icon).anchor(0.5f,1));
-                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, cameraP));
-                        ready=true;
+                        if (moved){
+                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLngMoved, cameraP));
+                        }else {
+                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, cameraP));
+                        }                        ready=true;
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -120,8 +126,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                  //       mMap.addMarker(new MarkerOptions().position(latLng).title(city));
                         BitmapDescriptor icon = BitmapDescriptorFactory.fromResource(R.drawable.location);
 
+                        mMap.clear();
                         mMap.addMarker(new MarkerOptions().position(latLng).title(city).icon(icon).anchor(0.5f,1));
-                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, cameraP));
+                        if (moved){
+                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLngMoved, cameraP));
+                        }else {
+                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, cameraP));
+                        }
                         ready=true;
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -200,6 +211,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             public void onCameraChange(CameraPosition cameraPosition) {
                 if (ready) {
                     cameraP = mMap.getCameraPosition().zoom;
+                    latLngMoved=new LatLng(cameraPosition.target.latitude,cameraPosition.target.longitude);
+                    moved=true;
                 }
                 Log.i("centerLat", String.valueOf(cameraPosition.target.latitude));
 
