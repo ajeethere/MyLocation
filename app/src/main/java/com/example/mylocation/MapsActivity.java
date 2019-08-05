@@ -34,6 +34,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.example.mylocation.directionhelpers.TaskLoadedCallback;
+import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -64,6 +65,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     LatLng latLng;
 
     Polyline line;
+    String  url="https://upload.wikimedia.org/wikipedia/en/7/7e/Thor_-_The_Dark_World_poster.jpg";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,6 +119,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         }
                         markerOptions=new MarkerOptions().position(latLng).title(city).icon(icon).anchor(0.5f,1);
                         marker=mMap.addMarker(markerOptions);
+                        PicassoMarker picassoMarker=new PicassoMarker(marker);
+                        Picasso.with(MapsActivity.this).load(url).into(picassoMarker);
                         hashMapMarker.put("my",marker);
                         if (moved){
                             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLngMoved, cameraP));
@@ -174,6 +178,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         }
                         markerOptions=new MarkerOptions().position(latLng).title(city).icon(icon).anchor(0.5f,1);
                         marker=mMap.addMarker(markerOptions);
+                        PicassoMarker picassoMarker=new PicassoMarker(marker);
+                        Picasso.with(MapsActivity.this).load(url).into(picassoMarker);
                         hashMapMarker.put("my",marker);
 
                         if (moved){
